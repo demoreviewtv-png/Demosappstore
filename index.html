@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My App Store</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #1a1a1a; }
+    #app-list { display: flex; flex-direction: column; gap: 15px; max-width: 500px; margin: 0 auto; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .title { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; color: #111; }
+    .version { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+    .desc { font-size: 0.95rem; color: #444; margin-bottom: 15px; }
+    .download-btn { display: block; text-align: center; background: #0066ff; color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+    .download-btn:active { background: #004ecc; }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <h1>📱 Custom App Store</h1>
+  <div id="app-list">Loading apps...</div>
+
+  <script>
+    // 1. Paste YOUR Firebase Config here (Get this from Firebase Console > Project Settings)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // 2. Fetch apps in real time
+    database.ref('apps').on('value', (snapshot) => {
+      const appContainer = document.getElementById('app-list');
+      appContainer.innerHTML = ''; // Clear loading text
+
+      const data = snapshot.val();
+      if (!data) {
+        appContainer.innerHTML = '<p style="text-align:center;">No apps available right now.</p>';
+        return;
+      }
+
+      // Loop through Firebase data and build HTML cards
+      Object.keys(data).forEach((key) => {
+        const app = data[key];
+        const cardHtml = `
+          <div class="card">
+            <div class="title">${app.name}</div>
+            <div class="version">Version ${app.version}</div>
+            <div class="desc">${app.description}</div>
+            <a href="${app.apk_url}" class="download-btn">Download APK</a>
+          </div>
+        `;
+        appContainer.innerHTML += cardHtml;
+      });
+    });
+  </script>
+</body>
+</html>
